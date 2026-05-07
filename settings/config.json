@@ -1,0 +1,40 @@
+{
+  "project_name": "Peace System",
+  "version": "1.0.0",
+  "pipeline_port" : 5005,
+  "logging": {
+    "level": "INFO",
+    "retention_days": 7,
+    "file": "log/system.log"
+  },
+  "collection_intervals": {
+    "cpu": 5,
+    "ram": 5,
+    "disk": 60,
+    "network": 10,
+    "docker": 30,
+    "units": "seconds",
+    "allow_collection": {
+      "cpu": true,
+      "ram": true,
+      "disk": true,
+      "network": true,
+      "docker": true
+    }
+  },
+  "anomaly_thresholds": {
+    "cpu_usage_percent": 85.0,
+    "ram_usage_percent": 90.0,
+    "disk_usage_percent": 95.0,
+    "network_latency_ms": 200,
+    "consecutive_hits": 3
+  },
+  "storage": {
+    "db_name": "sqlite.db",
+    "db_path": "storage/sqlite.db",
+    "retention_days": 7
+  },
+  "web": {
+    "websocket_port": 8080
+  }
+}
