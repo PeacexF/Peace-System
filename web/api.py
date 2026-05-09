@@ -67,5 +67,5 @@ async def get_alerts(limit: int = 50):
 
 if __name__ == "__main__":
     port = config._data.get("web", {}).get("api_port", 8000)
-    logger.info(f"Starting API Server on port {port}...")
+    logger.info(f"[API] Starting API Server on port {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)
