@@ -14,5 +14,6 @@ server
 collector
 websocket
 venv/
+context/
 context*
 sqlite.db

@@ -85,5 +85,3 @@ class Storage:
                 logger.error(f"[STORAGE] Storage Cleanup Error: {e}")
             
             await asyncio.sleep(3600) # Проверка каждый час
-
-storage = Storage()
