@@ -64,7 +64,6 @@ class EventPipeline:
 
     # Routing
     async def route(self, event: Event):
-        """Определение списка получателей """
         handlers = self.subscribers.get(event.type, [])
         if not handlers:
             logger.debug(f"[PIPELINE] No subscribers for event type: {event.type}")

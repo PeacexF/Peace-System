@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from log.logger import logger
 
 
-# Важно: понимать, что запись не производится напрямую в бд, мы записываем своего рода список в буфер и из буфер кидаем запись в бд
+# Важно: понимать, что запись не производится напрямую в бд, мы записываем своего рода список в буфер и из буфера кидаем запись в бд
 class Storage:
     def __init__(self, db_path: str, retention_days: int = 7, batch_size: int = 15):
         self.db_path = db_path
@@ -29,9 +29,9 @@ class Storage:
                 """)
                 await db.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON events(timestamp)')
                 await db.commit()
-                logger.info(f"Storage: Database initialized at {self.db_path}. Retention: {self.retention_days} days")
+                logger.info(f"[STORAGE] Storage: Database initialized at {self.db_path}. Retention: {self.retention_days} days")
         except Exception as e:
-            logger.error(f"Storage: Failed to initialize database: {e}")
+            logger.error(f"[STORAGE] Storage: Failed to initialize database: {e}")
 
     async def save_event(self, event: dict):
         # Фильтр событий на сохранение
@@ -67,12 +67,12 @@ class Storage:
                     to_save
                 )
                 await db.commit()
-                logger.debug(f"Storage: Flushed {len(to_save)} events to SQLite")   # сброс буфера нет смысла писать в файл логов
+                logger.debug(f"[STORAGE] Storage: Flushed {len(to_save)} events to SQLite")
         except Exception as e:
-            logger.error(f"Storage: Failed to flush events: {e}")
+            logger.error(f"[STORAGE] Storage: Failed to flush events: {e}")
 
     async def cleanup_loop(self):
-        logger.info("Storage: Cleanup loop started")
+        logger.info("[STORAGE] Storage: Cleanup loop started")    # автоматическая очистка бд
         while True:
             cutoff = int((datetime.now() - timedelta(days=self.retention_days)).timestamp())
             try:
@@ -80,8 +80,10 @@ class Storage:
                     cursor = await db.execute('DELETE FROM events WHERE timestamp < ?', (cutoff,))
                     await db.commit()
                     if cursor.rowcount > 0:
-                        logger.info(f"Storage Cleanup: Removed {cursor.rowcount} old records")
+                        logger.info(f"[STORAGE] Storage Cleanup: Removed {cursor.rowcount} old records")
             except Exception as e:
-                logger.error(f"Storage Cleanup Error: {e}")
+                logger.error(f"[STORAGE] Storage Cleanup Error: {e}")
             
             await asyncio.sleep(3600) # Проверка каждый час
+
+storage = Storage()
