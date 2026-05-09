@@ -1,3 +1,9 @@
+![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Actively Developed](https://img.shields.io/badge/Actively%20Developed-yes-success)
+![Monitoring](https://img.shields.io/badge/Monitoring-realtime-success)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+
 # Real-Time Monitoring System
 
 Peace-System is a lightweight open-source observability platform for local system monitoring. (runs on and utilizes localhost)
