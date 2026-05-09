@@ -3,10 +3,21 @@ import json
 from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Callable, Awaitable
 
-from settings.config_loader import config
-from log.logger import logger
-from shared_models import Event
+from settings.config_loader import config       # Конфиг
+from log.logger import logger                   # Логгер
+from shared_models import Event                 # Shared типовой event
+from storage.storage import Storage             # БД
 
+
+storage = Storage(  # Импортированный класс БД
+    db_path=config._data.get("storage", {}).get("db_path", "storage/sqlite.db"),
+    retention_days=config._data.get("storage", {}).get("retention_days", 7)
+)
+
+async def periodic_db_flush():
+    while True:
+        await asyncio.sleep(5)
+        await storage.flush()
 
 class PipelineProtocol(asyncio.DatagramProtocol):   # класс для приема UDP от коллекторов на Go
     def __init__(self, pipeline_instance):
@@ -75,7 +86,7 @@ class EventPipeline:
 
     # Dispatch (воркерами)
     async def start_worker(self):
-        logger.info("[PIPELINE] Event Pipeline Worker started.")
+        logger.info("[PIPELINE] Event Pipeline Worker started.")        
         while True:
             handler, event = await self.queue.get()
             try:
@@ -88,6 +99,10 @@ class EventPipeline:
     
     # Запуск севера и инициализация воркера
     async def start_server(self):
+        await storage.initialize()
+        asyncio.create_task(storage.cleanup_loop())
+        asyncio.create_task(periodic_db_flush())
+
         port = config._data.get("pipeline_port", 5005)
         loop = asyncio.get_running_loop()
         
@@ -99,31 +114,32 @@ class EventPipeline:
             local_addr=('127.0.0.1', port)
         )
         
-        # Запускаем воркер для обработки очереди
-        await self.start_worker()
+        asyncio.create_task(self.start_worker())
 
-# Импортируем модули (когда они будут готовы)
-# from storage.sqlite import save_to_db
-# from engine.analyzer import check_metrics
-# from engine.alert import process_alert
+        try:
+            while True:
+                await asyncio.sleep(3600) 
+        except asyncio.CancelledError:
+            transport.close()
 
-# Прописываем логику связей прямо здесь
-def setup_subscriptions(storage_func, analyzer_func, alert_func, ws_func):
-    pipeline.subscribers["metric"].append(storage_func)
-    pipeline.subscribers["metric"].append(analyzer_func)
+async def storage_handler(event: Event):
+    await storage.save_event(asdict(event))
+
+# Подписки на Events
+def setup_subscriptions(storage_handler):
+    pipeline.subscribers["metric"].append(storage_handler)
     
-    pipeline.subscribers["alert"].append(alert_func)
-    pipeline.subscribers["alert"].append(ws_func)
+    pipeline.subscribers["alert"].append(storage_handler)
+
 
 pipeline = EventPipeline()
 
+
 if __name__ == "__main__":    
     try:
+        setup_subscriptions(storage_handler)
         asyncio.run(pipeline.start_server())
     except KeyboardInterrupt:
         pass
     except Exception as e:
-        logger.error("[PIPELINE] Pipeline error: {e}", exc_info=True)
-
-
-# я пока писал, раз 10 точно вместо "pipeline" писал "pipiline" и меня каждый раз рвало с этого слова. Мб переименовать?
+        logger.error(f"[PIPELINE] Pipeline error: {e}", exc_info=True)
