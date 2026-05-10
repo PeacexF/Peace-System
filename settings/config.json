@@ -27,7 +27,7 @@
     "ram_usage_percent": 10.0,
     "disk_usage_percent": 10.0,
     "network_latency_ms": 200,
-    "consecutive_hits": 3
+    "consecutive_hits": 1
   },
   "storage": {
     "db_name": "sqlite.db",

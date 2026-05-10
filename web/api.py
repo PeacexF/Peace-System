@@ -36,6 +36,7 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
+            logger.info(f"[API] Websocket: disconnect() called")
 
     async def broadcast(self, message: dict):
         for connection in self.active_connections:
@@ -50,15 +51,6 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            await websocket.receive()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-@app.websocket("/wss")      # Alias. I need to fix websockets, they stopped working
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:

@@ -2,7 +2,7 @@ import { useMetrics } from './hooks/useMetrics';
 import MetricChart from './components/MetricChart';
 
 function App() {
-  const { metrics, alerts, status, error } = useMetrics(30, 2000);  // i'm sorry but i can't comment that it's like 5 or 6 AM rn
+  const { metrics, alerts, status, error } = useMetrics(30, 2000);
 
   return (
     <div className="min-h-screen bg-black text-gray-100 p-6 font-sans">
@@ -28,7 +28,7 @@ function App() {
       </header>
 
       <main>
-        {error && ( // maybe just remove error so no error -> good?
+        {error && (
           <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 text-red-400 rounded-lg font-mono text-sm">
             critical_error: {error}
           </div>

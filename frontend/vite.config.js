@@ -15,16 +15,9 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/ws': {
-        target: 'ws://127.0.0.1:8000',  // try http://
+        target: 'ws://127.0.0.1:8000',
         ws: true,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/ws/, '/ws') 
-      },
-      '/wss': {
-        target: 'ws://127.0.0.1:8000',
-        wss: true,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/wss/, '/wss') 
       },
     },
   },
