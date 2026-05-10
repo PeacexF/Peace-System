@@ -20,8 +20,8 @@ class Analyzer:
     def _get_threshold_key(self, source):
         mapping = {
             "cpu_collector": "cpu_usage_percent",
-            "ram_collector": "ram_usage_percent",
-            "disk_collector": "disk_usage_percent"
+            "ram_collector": "used_percent",
+            "disk_collector": "used_percent"
         }
         return mapping.get(source)
 
@@ -30,6 +30,7 @@ class Analyzer:
         data = event.data
         
         key = self._get_threshold_key(source)
+        logger.debug(f"[ANALYZER] Checking {source} with key {key}. Value: {data.get(key)}")
         if not key or key not in data:
             return
 

@@ -6,10 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import WebSocket, WebSocketDisconnect
 from typing import List
 
-from settings.config_loader import config
-from log.logger import logger
+from settings.config_loader import config       # Config
+from log.logger import logger                   # Logger
 
-app = FastAPI()     # `python -m web.api`
+app = FastAPI()     # `python -m web.api` -> starting
 
 origins = ["*"]     # Dunno if we really need CORS here, considering that everything is on localhost, but it's good practise
 methods = ["*"]
@@ -53,7 +53,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
-@app.post("/internal/broadcast")
+@app.post("/internal/broadcast")    # Pipeline <-> API
 async def internal_broadcast(event: dict):
     await manager.broadcast(event)
     return {"status": "broadcasted"}
@@ -66,7 +66,7 @@ def get_db():
     return aiosqlite.connect(f"file:{db_path}?mode=ro", uri=True)
 
 @app.get("/api/status")
-async def get_status():
+async def get_status():     # Overall status
     async with get_db() as db:
         db.row_factory = aiosqlite.Row
         query = "SELECT COUNT(*) as cnt FROM events"
@@ -75,7 +75,7 @@ async def get_status():
             return {"total_events": row["cnt"], "status": "online"}
 
 @app.get("/api/metrics/latest")
-async def get_latest_metrics(limit: int = 20):
+async def get_latest_metrics(limit: int = 20):  # Latest metrics from db
     async with get_db() as db:
         db.row_factory = aiosqlite.Row
         query = """
@@ -97,7 +97,7 @@ async def get_latest_metrics(limit: int = 20):
             return result
 
 @app.get("/api/alerts")
-async def get_alerts(limit: int = 50):
+async def get_alerts(limit: int = 50):     # Alerts 
     async with get_db() as db:
         query = "SELECT * FROM events WHERE type = 'alert' ORDER BY id DESC LIMIT ?"
         async with db.execute(query, (limit,)) as cursor:

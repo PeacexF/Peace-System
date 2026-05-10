@@ -7,6 +7,7 @@ from log.logger import logger
 
 
 # Важно: понимать, что запись не производится напрямую в бд, мы записываем своего рода список в буфер и из буфера кидаем запись в бд
+# Конфигурация происхоит через event_pipeline
 class Storage:
     def __init__(self, db_path: str, retention_days: int = 7, batch_size: int = 15):
         self.db_path = db_path

@@ -8,7 +8,7 @@ from settings.config_loader import config       # Конфиг
 from log.logger import logger                   # Логгер
 from shared_models import Event                 # Shared типовой event
 from storage.storage import Storage             # БД
-from engine.analyzer import Analyzer
+from engine.analyzer import Analyzer            # Обнаружение аномалий
 
 
 storage = Storage(  # Импортированный класс БД
@@ -29,11 +29,8 @@ class PipelineProtocol(asyncio.DatagramProtocol):   # класс для прие
         self.pipeline = pipeline_instance
 
     def datagram_received(self, data, addr):
-        # raw bytes -> str
-        message = data.decode('utf-8')
-        logger.info(f"[PIPELINE] {message}") # Пока что оставить, дебаг -> вывод приходящих данных
-        # Создаем задачу в пайплайне
-        asyncio.create_task(self.pipeline.emit(message))
+        message = data.decode('utf-8')                      # raw bytes -> str
+        asyncio.create_task(self.pipeline.emit(message))    # Создаем задачу в пайплайне
 
 class EventPipeline:
     def __init__(self):
@@ -42,7 +39,7 @@ class EventPipeline:
         
         # Реестр подписчиков: какой тип события куда отправлять (через if/else получается дичь)
         self.subscribers: Dict[str, List[Callable[[Event], Awaitable[None]]]] = {
-            "metric": [],   # Storage и Analyzer
+            "metric": [],   # Storage Analyzer WebSocket
             "alert": [],    # WebSocket и Alert Engine
             "anomaly": []   # Logger или доп. анализаторы
         }
@@ -80,8 +77,7 @@ class EventPipeline:
             data=data["data"],
             metadata=data.get("metadata", {})
         )
-        # системные метаданные 
-        event.metadata["version"] = config._data.get("version", "1.0.0")
+        event.metadata["version"] = config._data.get("version", "1.0.0")    # системные метаданные 
         
         await self.route(event)
 
@@ -140,7 +136,7 @@ async def storage_handler(event: Event):
 async def websocket_broadcast_handler(event: Event):
     try:
         event_dict = asdict(event)
-        await http_client.post("/internal/broadcast", json=event_dict)
+        await http_client.post("/internal/broadcast", json=event_dict)  # i hate how it breaks the beauty of logs
     except Exception as e:
         logger.error(f"[PIPELINE] WebSocket Broadcast Error: {e}")
         await http_client.aclose()
@@ -158,7 +154,6 @@ def setup_subscriptions(storage_handler, websocket_broadcast_handler, analyzer):
 
 pipeline = EventPipeline()
 analyzer = Analyzer(pipeline)
-
 
 
 if __name__ == "__main__":    

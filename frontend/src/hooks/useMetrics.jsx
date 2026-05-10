@@ -3,6 +3,7 @@ import { apiService } from '../services/api';
 
 export const useMetrics = (limit = 30) => {
   const [metrics, setMetrics] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [status, setStatus] = useState({ total_events: 0, status: 'offline' });
   const [error, setError] = useState(null);
   
@@ -34,6 +35,11 @@ export const useMetrics = (limit = 30) => {
 
     socket.onmessage = (event) => {
       const rawEvent = JSON.parse(event.data);
+
+      if (rawEvent.type === 'alert') {
+        setAlerts(prev => [rawEvent.data, ...prev].slice(0, 10));
+        return; 
+      }
       
       const timeLabel = new Date(rawEvent.timestamp * 1000).toLocaleTimeString();
       
@@ -58,5 +64,5 @@ export const useMetrics = (limit = 30) => {
     return () => socket.close();
   }, [limit]);
 
-  return { metrics, status, error };
+  return { metrics, alerts, status, error };
 };
