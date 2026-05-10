@@ -14,7 +14,7 @@ import (
 
 // READ cpu.go FOR COMMENTED CODE, SCRUCTURE IS THE SAME
 
-func GetNetwork() {
+func GetNetwork() { // Need to add latency
 	cfg, err := shared.LoadConfig("../settings/config.json")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)

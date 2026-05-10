@@ -30,7 +30,7 @@ class Analyzer:
         data = event.data
         
         key = self._get_threshold_key(source)
-        logger.debug(f"[ANALYZER] Checking {source} with key {key}. Value: {data.get(key)}")
+        logger.info(f"[ANALYZER] Checking {source} with key {key}. Value: {data.get(key)}")
         if not key or key not in data:
             return
 
@@ -50,6 +50,7 @@ class Analyzer:
         last_send = self.last_sent_at.get(source, 0)
 
         if is_anomaly:
+            logger.info(f"[ANALYZER] Anomaly detected: bool value -> {is_anomaly} with event: {original_event}")
             if current_state == "RESOLVED" or (now - last_send > self.cooldown_seconds):
                 state_to_send = "NEW" if current_state == "RESOLVED" else "ACTIVE"
                 

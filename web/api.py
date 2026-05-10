@@ -22,12 +22,14 @@ app.add_middleware(
     allow_headers=headers,
 )
 
+dead_connections = []
 # WebSockets
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
+        logger.info(f"[API] Websocket: connect() called")
         await websocket.accept()
         self.active_connections.append(websocket)
 
@@ -39,8 +41,11 @@ class ConnectionManager:
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.info(f"[API] Websocket: Broadcast error: {e}")
+                dead_connections.append(connection)
+        for conn in dead_connections:
+            self.disconnect(conn)
 
 manager = ConnectionManager()
 
@@ -49,7 +54,16 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            await websocket.receive_text()
+            await websocket.receive()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+@app.websocket("/wss")      # Alias. I need to fix websockets, they stopped working
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
