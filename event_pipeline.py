@@ -8,6 +8,7 @@ from settings.config_loader import config       # Конфиг
 from log.logger import logger                   # Логгер
 from shared_models import Event                 # Shared типовой event
 from storage.storage import Storage             # БД
+from engine.analyzer import Analyzer
 
 
 storage = Storage(  # Импортированный класс БД
@@ -55,6 +56,13 @@ class EventPipeline:
             logger.error(f"[PIPELINE] Pipeline Input Error: Invalid JSON - {e}")    # метка в логах [PIPELINE] для удобного различия от логов других источников
         except Exception as e:
             logger.error(f"[PIPELINE] Unexpected error during emit: {e}", exc_info=True)
+
+    # For already normalized data (from analyzer)
+    async def emit_event(self, event: Event):
+        try:
+            await self.route(event)
+        except Exception as e:
+            logger.error(f"[PIPELINE] Error emitting event object: {e}", exc_info=True)
 
     # Validation
     async def validate(self, data: Dict):
@@ -139,20 +147,23 @@ async def websocket_broadcast_handler(event: Event):
 
 
 # Подписки на Events
-def setup_subscriptions(storage_handler, websocket_broadcast_handler):
+def setup_subscriptions(storage_handler, websocket_broadcast_handler, analyzer):
     pipeline.subscribers["metric"].append(storage_handler)
     pipeline.subscribers["metric"].append(websocket_broadcast_handler)
+    pipeline.subscribers["metric"].append(analyzer.process_metric)
 
     pipeline.subscribers["alert"].append(storage_handler)
     pipeline.subscribers["alert"].append(websocket_broadcast_handler)
 
 
 pipeline = EventPipeline()
+analyzer = Analyzer(pipeline)
+
 
 
 if __name__ == "__main__":    
     try:
-        setup_subscriptions(storage_handler, websocket_broadcast_handler)
+        setup_subscriptions(storage_handler, websocket_broadcast_handler, analyzer)
         asyncio.run(pipeline.start_server())
     except KeyboardInterrupt:
         http_client.aclose()    # idk where to close it honestly

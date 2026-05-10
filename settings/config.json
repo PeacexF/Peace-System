@@ -23,8 +23,8 @@
     }
   },
   "anomaly_thresholds": {
-    "cpu_usage_percent": 85.0,
-    "ram_usage_percent": 90.0,
+    "cpu_usage_percent": 15.0,
+    "ram_usage_percent": 30.0,
     "disk_usage_percent": 95.0,
     "network_latency_ms": 200,
     "consecutive_hits": 3
