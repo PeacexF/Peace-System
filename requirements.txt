@@ -2,3 +2,5 @@ aiosqlite
 asyncio
 fastapi
 uvicorn
+httpx
+'uvicorn[standard]'

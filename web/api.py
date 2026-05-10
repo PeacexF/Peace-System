@@ -3,6 +3,8 @@ import aiosqlite
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import WebSocket, WebSocketDisconnect
+from typing import List
 
 from settings.config_loader import config
 from log.logger import logger
@@ -19,6 +21,43 @@ app.add_middleware(
     allow_methods=methods,
     allow_headers=headers,
 )
+
+# WebSockets
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except Exception:
+                pass
+
+manager = ConnectionManager()
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+@app.post("/internal/broadcast")
+async def internal_broadcast(event: dict):
+    await manager.broadcast(event)
+    return {"status": "broadcasted"}
+
 
 DB_PATH = config._data.get("storage", {}).get("db_path", "storage/sqlite.db")
 

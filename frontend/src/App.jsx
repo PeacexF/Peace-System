@@ -2,15 +2,14 @@ import { useMetrics } from './hooks/useMetrics';
 import MetricChart from './components/MetricChart';
 
 function App() {
-  console.log("App is rendering")
-  const { metrics, status, error } = useMetrics(30, 2000);
+  const { metrics, status, error } = useMetrics(30, 2000);  // i'm sorry but i can't comment that it's like 5 or 6 AM rn
 
   return (
     <div className="min-h-screen bg-black text-gray-100 p-6 font-sans">
       <header className="flex justify-between items-center mb-8 pb-6 border-b border-gray-800">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">PEACE SYSTEM</h1>
-          <p className="text-gray-500 text-sm font-mono">Observability Dashboard v1.0</p>
+          <p className="text-gray-500 text-sm font-mono">Observability Dashboard</p>
         </div>
         
         <div className="flex gap-6">
@@ -29,20 +28,20 @@ function App() {
       </header>
 
       <main>
-        {error && (
+        {error && ( // maybe just remove error so no error -> good?
           <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 text-red-400 rounded-lg font-mono text-sm">
             critical_error: {error}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MetricChart 
+          <MetricChart
             title="CPU USAGE (%)" 
             data={metrics} 
             dataKey="cpu"
             color="#10B981" 
           />
-          <MetricChart 
+          <MetricChart
             title="RAM USAGE (%)" 
             data={metrics} 
             dataKey="ram"

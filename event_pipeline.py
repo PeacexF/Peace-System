@@ -1,5 +1,6 @@
 import asyncio
 import json
+import httpx
 from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Callable, Awaitable
 
@@ -13,6 +14,9 @@ storage = Storage(  # Импортированный класс БД
     db_path=config._data.get("storage", {}).get("db_path", "storage/sqlite.db"),
     retention_days=config._data.get("storage", {}).get("retention_days", 7)
 )
+
+api_port = config._data.get("web", {}).get("api_port", 8000)
+http_client = httpx.AsyncClient(base_url=f"http://127.0.0.1:{api_port}")    # For WebSockets
 
 async def periodic_db_flush():
     while True:
@@ -125,11 +129,22 @@ class EventPipeline:
 async def storage_handler(event: Event):
     await storage.save_event(asdict(event))
 
+async def websocket_broadcast_handler(event: Event):
+    try:
+        event_dict = asdict(event)
+        await http_client.post("/internal/broadcast", json=event_dict)
+    except Exception as e:
+        logger.error(f"[PIPELINE] WebSocket Broadcast Error: {e}")
+        await http_client.aclose()
+
+
 # Подписки на Events
-def setup_subscriptions(storage_handler):
+def setup_subscriptions(storage_handler, websocket_broadcast_handler):
     pipeline.subscribers["metric"].append(storage_handler)
-    
+    pipeline.subscribers["metric"].append(websocket_broadcast_handler)
+
     pipeline.subscribers["alert"].append(storage_handler)
+    pipeline.subscribers["alert"].append(websocket_broadcast_handler)
 
 
 pipeline = EventPipeline()
@@ -137,9 +152,10 @@ pipeline = EventPipeline()
 
 if __name__ == "__main__":    
     try:
-        setup_subscriptions(storage_handler)
+        setup_subscriptions(storage_handler, websocket_broadcast_handler)
         asyncio.run(pipeline.start_server())
     except KeyboardInterrupt:
+        http_client.aclose()    # idk where to close it honestly
         pass
     except Exception as e:
         logger.error(f"[PIPELINE] Pipeline error: {e}", exc_info=True)
