@@ -19,7 +19,7 @@ class Analyzer:
 
     def _get_threshold_key(self, source):
         mapping = {
-            "cpu_collector": ("cpu_usage_percent", "cpu_usage_percent"),
+            "cpu_collector": ("cpu_usage_percent"),
             "ram_collector": ("used_percent", "ram_usage_percent"),
             "disk_collector": ("used_percent", "disk_usage_percent")
         }
