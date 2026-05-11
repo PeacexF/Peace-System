@@ -3,8 +3,10 @@ from collections import deque
 from dataclasses import asdict
 from datetime import datetime
 from shared_models import Event
+
 from settings.config_loader import config
 from log.logger import logger
+
 
 class Analyzer:
     def __init__(self, pipeline):
