@@ -19,9 +19,9 @@ class Analyzer:
 
     def _get_threshold_key(self, source):
         mapping = {
-            "cpu_collector": "cpu_usage_percent",
-            "ram_collector": "used_percent",
-            "disk_collector": "used_percent"
+            "cpu_collector": ("cpu_usage_percent", "cpu_usage_percent"),
+            "ram_collector": ("used_percent", "ram_usage_percent"),
+            "disk_collector": ("used_percent", "disk_usage_percent")
         }
         return mapping.get(source)
 
@@ -29,16 +29,20 @@ class Analyzer:
         source = event.source
         data = event.data
         
-        key = self._get_threshold_key(source)
-        logger.info(f"[ANALYZER] Checking {source} with key {key}. Value: {data.get(key)}")
-        if not key or key not in data:
+        keys = self._get_threshold_key(source)
+        if not keys:
             return
 
-        limit = self.thresholds.get(key, 100.0)
+        data_key, threshold_key = keys
+        logger.info(f"[ANALYZER] Checking {source} with data key {data_key} and threshold key {threshold_key}. Value: {data.get(data_key)}")
+        if data_key not in data:
+            return
+
+        limit = self.thresholds.get(threshold_key, 100.0)
         if source not in self.windows:
             self.windows[source] = deque(maxlen=self.consecutive_limit)
         
-        self.windows[source].append(data[key] >= limit)
+        self.windows[source].append(data[data_key] >= limit)
         
         is_anomaly = len(self.windows[source]) == self.consecutive_limit and all(self.windows[source])
 
