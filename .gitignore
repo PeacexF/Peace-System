@@ -7,8 +7,6 @@ Icon
 Thumbs.db
 ehthumbs.db
 __pycache__/
-go.mod
-go.sum
 main
 server
 collector
