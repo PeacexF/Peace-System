@@ -68,8 +68,7 @@ async def internal_broadcast(event: dict):
 DB_PATH = config._data.get("storage", {}).get("db_path", "storage/sqlite.db")
 
 def get_db():
-    db_path = config._data.get("storage", {}).get("db_path", "storage/sqlite.db")
-    return aiosqlite.connect(f"file:{db_path}?mode=ro", uri=True)
+    return aiosqlite.connect(f"file:{DB_PATH}?mode=ro", uri=True)
 
 @app.get("/api/status")
 async def get_status():     # Overall status

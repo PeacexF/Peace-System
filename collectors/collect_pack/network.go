@@ -14,7 +14,7 @@ import (
 
 // READ cpu.go FOR COMMENTED CODE, SCRUCTURE IS THE SAME
 
-func GetNetwork() { // Need to add latency
+func GetNetwork() {
 	cfg, err := shared.LoadConfig("../settings/config.json")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
@@ -64,10 +64,10 @@ func GetNetwork() { // Need to add latency
 			Type:   "metric",
 			Source: "network_collector",
 			Data: map[string]interface{}{
-				"bytes_sent":   ioStats[0].BytesSent,
-				"bytes_recv":   ioStats[0].BytesRecv,
-				"active_ports": activePorts,
-				"conn_count":   len(activePorts),
+				"bytes_sent":         ioStats[0].BytesSent,
+				"bytes_recv":         ioStats[0].BytesRecv,
+				"active_ports":       activePorts,
+				"network_conn_count": len(activePorts),
 			},
 			Timestamp: time.Now().Unix(),
 		}

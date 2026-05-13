@@ -12,7 +12,7 @@
     "ram": 5,
     "disk": 60,
     "network": 10,
-    "docker": 30,
+    "docker": 10,
     "units": "seconds",
     "allow_collection": {
       "cpu": true,
@@ -23,10 +23,12 @@
     }
   },
   "anomaly_thresholds": {
-    "cpu_usage_percent": 1.0,
-    "ram_usage_percent": 10.0,
-    "disk_usage_percent": 10.0,
+    "cpu_usage_percent": 90,
+    "ram_usage_percent": 80.0,
+    "disk_usage_percent": 85.0,
     "network_latency_ms": 200,
+    "network_conn_count": 150,
+    "active_containers_count": 10,
     "consecutive_hits": 1
   },
   "storage": {

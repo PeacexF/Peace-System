@@ -23,7 +23,9 @@ class Analyzer:
         mapping = {
             "cpu_collector": ("cpu_usage_percent", "cpu_usage_percent"),
             "ram_collector": ("used_percent", "ram_usage_percent"),
-            "disk_collector": ("used_percent", "disk_usage_percent")
+            "disk_collector": ("used_percent", "disk_usage_percent"),
+            "network_collector": ("network_conn_count", "network_conn_count"),
+            "docker_collector": ("active_containers_count", "active_containers_count")
         }
         return mapping.get(source)
 
@@ -70,9 +72,18 @@ class Analyzer:
             await self._emit_alert(source, "RESOLVED", "info", original_event.data)
 
     async def _emit_alert(self, source, state, severity, trigger_data):
+        keys = self._get_threshold_key(source)
+        if keys:
+            data_key, _ = keys
+            value = trigger_data.get(data_key)
+            if value is not None:
+                value_str = f"{value:.1f}%"
+        else:
+            value_str = "unknown"
+        
         msg_map = {
-            "NEW": f"CRITICAL: {source} exceeded threshold!",
-            "ACTIVE": f"STILL CRITICAL: {source} is under pressure",
+            "NEW": f"CRITICAL: {source} exceeded threshold, {value_str}!",
+            "ACTIVE": f"STILL CRITICAL: {source} is under pressure, {value_str}",
             "RESOLVED": f"OK: {source} recovered to normal state"
         }
 
