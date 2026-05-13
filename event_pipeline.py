@@ -30,6 +30,8 @@ class PipelineProtocol(asyncio.DatagramProtocol):   # класс для прие
 
     def datagram_received(self, data, addr):
         message = data.decode('utf-8')                      # raw bytes -> str
+        logger.info(f"[PIPELINE] Messaage arrived: {message}")
+        logger.info(f"[PIPELINE] Initial data: {data}") 
         asyncio.create_task(self.pipeline.emit(message))    # Создаем задачу в пайплайне
 
 class EventPipeline:

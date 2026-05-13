@@ -60,16 +60,16 @@ export const useMetrics = (limit = 30) => {
 
     socket.onopen = () => {   // Debug logs
       setStatus(prev => ({ ...prev, status: 'online' }));
-      console.log("WS Connected");
+      //console.log("WS Connected");
     }
     socket.onclose = () => {
       setStatus(prev => ({ ...prev, status: 'offline' }));
-      console.log("WS Closed");
+      //console.log("WS Closed");
     }
     socket.onerror = () => setError("WebSocket connection error");
 
     return () => {
-        console.log("WS Closing...");
+        //console.log("WS Closing...");
         socket.close();
     };
 }, [limit]);

@@ -19,9 +19,9 @@ class Analyzer:
         self.alert_states = {}          # Текущий статус: {source: "ACTIVE" | "RESOLVED"}
         self.last_sent_at = {}          # Время последней отправки: {source: timestamp}
 
-    def _get_threshold_key(self, source):
+    def _get_threshold_key(self, source):   # смотреть модули с коллекторами для нормального key:value
         mapping = {
-            "cpu_collector": ("cpu_usage_percent"),
+            "cpu_collector": ("cpu_usage_percent", "cpu_usage_percent"),
             "ram_collector": ("used_percent", "ram_usage_percent"),
             "disk_collector": ("used_percent", "disk_usage_percent")
         }
