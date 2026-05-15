@@ -2,7 +2,6 @@
 
 ![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![Actively Developed](https://img.shields.io/badge/Actively%20Developed-yes-success)
 ![Monitoring](https://img.shields.io/badge/Monitoring-realtime-success)
 ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
 
@@ -19,6 +18,12 @@ A hybrid Go + Python monitoring stack with:
 - logging
 
 Inspired by tools like Netdata and Datadog, but designed for local/self-hosted usage.
+
+# Status
+The project is currently **finished** with some features missing.  
+I can't continue the development due to my exams coming short.  
+
+**In the future** I really want to add a specialized analysis of individual processes, as well as focus on the Docker module more(observability inside a container to determine whether it is malicious / is there anything malicious in it)
 
 ---
 

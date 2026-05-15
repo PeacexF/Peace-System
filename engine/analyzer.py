@@ -1,4 +1,3 @@
-import asyncio
 from collections import deque
 from dataclasses import asdict
 from datetime import datetime
